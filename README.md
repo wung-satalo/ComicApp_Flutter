@@ -10,6 +10,6 @@ This project was also developed with guidance and learning from the following Yo
 - PART5: https://www.youtube.com/watch?v=F3u_peUB5jQ&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=5
 - PART6: https://www.youtube.com/watch?v=IzLjprNXcmM&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=6
 
-- AI Assistance: ChatGPT (used for guidance, debugging, and improving code structure)
+- AI Assistance: ChatGPT Claude Gemini(used for guidance, debugging, and improving code structure)
 
 The channel provides helpful tutorials and explanations related to Flutter development.
