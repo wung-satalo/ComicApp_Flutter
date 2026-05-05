@@ -217,7 +217,10 @@ class _MyHomePageTestableState extends State<MyHomePageTestable> {
   @override
   void initState() {
     super.initState();
-    final db = FirebaseDatabase(app: widget.app);
+    final db = FirebaseDatabase.instanceFor(
+      app: widget.app,
+      databaseURL: 'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
+    );
     _bannerRef = db.ref().child('Banners');
   }
 

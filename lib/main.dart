@@ -15,8 +15,8 @@ void main() async {
     name: 'ReadApp',
     options: Platform.isMacOS || Platform.isIOS
       ? FirebaseOptions(
-          appId: 'IOS KEY',
-          apiKey: 'AIzaSyCB7wOkEUqY48T5W5yp2E9OtpNCRRBe-i0',
+          appId: '1:904073159015:ios:db823ecf375628e3598fc2',
+          apiKey: 'AIzaSyB-t3hPoPG2SZ0TU8Yn310_Nw84AFugRtU',
           projectId: 'reader-app-95191',
           messagingSenderId: '904073159015',
           databaseURL: 'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
@@ -259,7 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             children: [
                                               Expanded(
                                                 child: Text(
-                                                  '${comic.name}',
+                                                  comic.name,
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.bold,
