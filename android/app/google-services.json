@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "904073159015",
+    "project_id": "reader-app-95191",
+    "storage_bucket": "reader-app-95191.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904073159015:android:42c4cab64559fde8598fc2",
+        "android_client_info": {
+          "package_name": "com.nom.reader"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCB7wOkEUqY48T5W5yp2E9OtpNCRRBe-i0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
