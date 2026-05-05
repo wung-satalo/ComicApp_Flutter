@@ -1,17 +1,15 @@
-# reader_app
+## Additional Learning Resources
 
-A new Flutter project.
+This project was also developed with guidance and learning from the following YouTube channel:
 
-## Getting Started
+- YouTube: https://www.youtube.com/@eddydn71
+- PART1: https://www.youtube.com/watch?v=SRJvRaYDmY0&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=1
+- PART2: https://www.youtube.com/watch?v=qjBpv6MPXiM&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=2
+- PART3: https://www.youtube.com/watch?v=lflfaPtw0fg&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=3
+- PART4: https://www.youtube.com/watch?v=wQGGjkKlxKg&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=4
+- PART5: https://www.youtube.com/watch?v=F3u_peUB5jQ&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=5
+- PART6: https://www.youtube.com/watch?v=IzLjprNXcmM&list=PLaoF-xhnnrRXDnvDNSOiQAqBmKmoMM19J&index=6
 
-This project is a starting point for a Flutter application.
+- AI Assistance: ChatGPT (used for guidance, debugging, and improving code structure)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The channel provides helpful tutorials and explanations related to Flutter development.
