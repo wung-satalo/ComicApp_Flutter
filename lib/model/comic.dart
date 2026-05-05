@@ -16,7 +16,7 @@ class Comic {
   Comic.fromJson(Map<String, dynamic> json)
       : category = json['category'] ?? '',
         image = json['Image'] ?? '',
-        name = json['Name'] ?? '',
+        name = json['Name'] ?? '', 
         chapters = json['Chapters'] != null
             ? (json['Chapters'] as List)
                 .map((v) => Chapters.fromJson(v))
