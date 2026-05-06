@@ -7,9 +7,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:reader_app/screen/chapter_screen.dart';
-import 'package:reader_app/screen/read_screen.dart';
-import 'package:reader_app/state/state_manager.dart';
+import 'package:comico/screen/chapter_screen.dart';
+import 'package:comico/screen/read_screen.dart';
+import 'package:comico/state/state_manager.dart';
 
 import 'model/comic.dart';
 
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Reader App',
+      title: 'Comico',
       routes: {
         '/chapters': (context) => ChapterScreen(),
         '/read': (context) => ReadScreen(),
@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Commic Reader App', app: app),
+      home: MyHomePage(title: 'Comico Read', app: app),
     );
   }
 }
@@ -107,7 +107,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var searchEnable = ref.watch(isSearch);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFF44A3E),
+        backgroundColor: Colors.teal,
         leading: searchEnable
             ? IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -207,7 +207,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                 e,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                // ✅ แสดง loading ระหว่างโหลด
+
                                 loadingBuilder:
                                     (context, child, loadingProgress) {
                                       if (loadingProgress == null) {
@@ -273,7 +273,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     Expanded(
                       flex: 4,
                       child: Container(
-                        color: Colors.red,
+                        color: Colors.teal,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
@@ -286,12 +286,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     Expanded(
                       flex: 1,
                       child: Container(
-                        color: Colors.black,
+                        color: Colors.black.withValues(alpha: 0.1),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            '',
-                            style: TextStyle(color: Colors.white),
+                          child: Icon(
+                            Icons.new_releases_outlined,
+                            color: Colors.teal,
+                            size: 20,
                           ),
                         ),
                       ),

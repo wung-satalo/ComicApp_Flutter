@@ -1,4 +1,4 @@
-name: reader_app
+name: comico
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -27,6 +27,15 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  windows:
+    generate: true
+  macos:
+    generate: true
+  image_path: "assets/icon/app_icon.png"
+
 dependencies:
   flutter:
     sdk: flutter
@@ -42,6 +51,8 @@ dependencies:
   flutter_typeahead: ^6.0.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1  
+
   flutter_test:
     sdk: flutter
 
