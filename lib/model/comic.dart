@@ -14,7 +14,7 @@ class Comic {
   }) : chapters = chapters ?? [];
 
   Comic.fromJson(Map<String, dynamic> json)
-      : category = json['category'] ?? '',
+      : category = json['Category'] ?? '',
         image = json['Image'] ?? '',
         name = json['Name'] ?? '', 
         chapters = json['Chapters'] != null

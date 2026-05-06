@@ -6,6 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:reader_app/screen/chapter_screen.dart';
+import 'package:reader_app/screen/read_screen.dart';
+import 'package:reader_app/state/state_manager.dart';
 
 import 'model/comic.dart';
 
@@ -14,20 +18,22 @@ void main() async {
   final FirebaseApp app = await Firebase.initializeApp(
     name: 'ReadApp',
     options: Platform.isMacOS || Platform.isIOS
-      ? FirebaseOptions(
-          appId: '1:904073159015:ios:db823ecf375628e3598fc2',
-          apiKey: 'AIzaSyB-t3hPoPG2SZ0TU8Yn310_Nw84AFugRtU',
-          projectId: 'reader-app-95191',
-          messagingSenderId: '904073159015',
-          databaseURL: 'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
-        )
-      : FirebaseOptions(
-          appId: '1:904073159015:android:42c4cab64559fde8598fc2',
-          apiKey: 'AIzaSyCB7wOkEUqY48T5W5yp2E9OtpNCRRBe-i0',
-          projectId: 'reader-app-95191',
-          messagingSenderId: '904073159015',
-          databaseURL: 'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
-        ),
+        ? FirebaseOptions(
+            appId: '1:904073159015:ios:db823ecf375628e3598fc2',
+            apiKey: 'AIzaSyB-t3hPoPG2SZ0TU8Yn310_Nw84AFugRtU',
+            projectId: 'reader-app-95191',
+            messagingSenderId: '904073159015',
+            databaseURL:
+                'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
+          )
+        : FirebaseOptions(
+            appId: '1:904073159015:android:42c4cab64559fde8598fc2',
+            apiKey: 'AIzaSyCB7wOkEUqY48T5W5yp2E9OtpNCRRBe-i0',
+            projectId: 'reader-app-95191',
+            messagingSenderId: '904073159015',
+            databaseURL:
+                'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
+          ),
   );
   runApp(ProviderScope(child: MyApp(app: app)));
 }
@@ -41,6 +47,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Reader App',
+      routes: {
+        '/chapters': (context) => ChapterScreen(),
+        '/read': (context) => ReadScreen(),
+      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -50,25 +60,43 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key, required this.title, required this.app});
 
   final FirebaseApp app;
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends ConsumerState<MyHomePage> {
   late DatabaseReference _bannerRef, _comicsRef;
+  List<Comic> listComicFromFirebase = [];
+
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _closeSearch() {
+    _searchFocusNode.unfocus();
+    _searchController.clear();
+    ref.read(isSearch.notifier).state = false;
+  }
 
   @override
   void initState() {
     super.initState();
     final FirebaseDatabase database = FirebaseDatabase.instanceFor(
       app: widget.app,
-      databaseURL: 'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
+      databaseURL:
+          'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
     );
     _bannerRef = database.ref().child('Banners');
     _comicsRef = database.ref().child('Comic');
@@ -76,10 +104,79 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var searchEnable = ref.watch(isSearch);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFF44A3E),
-        title: Text(widget.title, style: TextStyle(color: Colors.white)),
+        leading: searchEnable
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: _closeSearch,
+              )
+            : null,
+        title: searchEnable
+            ? TypeAheadField<Comic>(
+                builder: (context, controller, focusNode) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      hintText: 'Search comics...',
+                      hintStyle: TextStyle(color: Colors.white70),
+                      border: InputBorder.none,
+                    ),
+                    style: DefaultTextStyle.of(context).style.copyWith(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+                itemBuilder: (context, comic) {
+                  return ListTile(
+                    leading: Image.network(
+                      comic.image,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                                size: 48,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    title: Text(comic.name),
+                    subtitle: comic.category.isNotEmpty
+                        ? Text(comic.category)
+                        : null,
+                  );
+                },
+                onSelected: (comic) {
+                  ref.read(comicSelected.notifier).state = comic;
+                  _closeSearch();
+                  Navigator.pushNamed(context, '/chapters');
+                },
+                suggestionsCallback: (searchString) async {
+                  return await searchComic(searchString);
+                },
+              )
+            : Text(widget.title, style: TextStyle(color: Colors.white)),
+        actions: [
+          if (!searchEnable)
+            IconButton(
+              onPressed: () => ref.read(isSearch.notifier).state = true,
+              icon: Icon(Icons.search),
+              color: Colors.white,
+            ),
+        ],
       ),
       body: FutureBuilder<List<String>>(
         future: getBanners(_bannerRef),
@@ -95,7 +192,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Builder(
                       builder: (context) {
                         return Card(
-                          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
                           elevation: 6,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -108,22 +208,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                                 // ✅ แสดง loading ระหว่างโหลด
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    color: Colors.grey[300],
-                                    child: Center(child: CircularProgressIndicator()),
-                                  );
-                                },
-                                // ✅ แสดงภาพสำรองเมื่อโหลดไม่ได้
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return Container(
+                                        color: Colors.grey[300],
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color: Colors.grey[300],
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.broken_image, color: Colors.grey, size: 48),
-                                        Text('โหลดรูปไม่ได้', style: TextStyle(color: Colors.grey)),
+                                        Icon(
+                                          Icons.broken_image,
+                                          color: Colors.grey,
+                                          size: 48,
+                                        ),
+                                        Text(
+                                          'โหลดรูปไม่ได้',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
                                       ],
                                     ),
                                   );
@@ -196,9 +308,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     } else if (snapshot.hasData) {
                       List<Comic> comics = [];
                       snapshot.data?.forEach((item) {
-                        var comic = Comic.fromJson(jsonDecode(jsonEncode(item)));
+                        var comic = Comic.fromJson(
+                          jsonDecode(jsonEncode(item)),
+                        );
                         comics.add(comic);
                       });
+                      listComicFromFirebase = comics;
                       return Expanded(
                         child: GridView.count(
                           crossAxisCount: 2,
@@ -208,7 +323,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           crossAxisSpacing: 1.0,
                           children: comics.map((comic) {
                             return GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                ref.read(comicSelected.notifier).state = comic;
+                                Navigator.pushNamed(context, '/chapters');
+                              },
                               child: Card(
                                 elevation: 12,
                                 child: Stack(
@@ -219,59 +337,83 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: Image.network(
                                         comic.image,
                                         fit: BoxFit.cover,
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Container(
-                                            color: Colors.grey[200],
-                                            child: Center(child: CircularProgressIndicator()),
-                                          );
-                                        },
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
-                                            color: Colors.grey[200],
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Icon(Icons.broken_image, color: Colors.grey, size: 40),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(4.0),
-                                                  child: Text(
-                                                    comic.name,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                                                  ),
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+                                              return Container(
+                                                color: Colors.grey[200],
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
                                                 ),
-                                              ],
-                                            ),
-                                          );
-                                        },
+                                              );
+                                            },
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey[200],
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                      size: 40,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            4.0,
+                                                          ),
+                                                      child: Text(
+                                                        comic.name,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
                                       ),
                                     ),
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          color: Colors.grey.withValues(alpha: 0.7),
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  comic.name,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    overflow: TextOverflow.ellipsis,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            color: Colors.grey.withValues(
+                                              alpha: 0.7,
+                                            ),
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    comic.name,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -311,5 +453,18 @@ class _MyHomePageState extends State<MyHomePage> {
     if (data is List) return data;
     if (data is Map) return data.values.toList();
     return [];
+  }
+
+  Future<List<Comic>> searchComic(String searchString) async {
+    return listComicFromFirebase
+        .where(
+          (comic) =>
+              comic.name.toLowerCase().contains(searchString.toLowerCase()) ||
+              (comic.category.isNotEmpty &&
+                  comic.category.toLowerCase().contains(
+                    searchString.toLowerCase(),
+                  )),
+        )
+        .toList();
   }
 }
