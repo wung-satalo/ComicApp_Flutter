@@ -3,12 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:comico/state/state_manager.dart';
 
-final readingModeProvider = StateProvider<ReadingMode>(
-  (ref) => ReadingMode.horizontal,
-);
-
-enum ReadingMode { horizontal, vertical }
-
 class ReadScreen extends ConsumerWidget {
   const ReadScreen({super.key});
 
