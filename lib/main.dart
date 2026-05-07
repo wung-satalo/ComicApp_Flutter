@@ -457,6 +457,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   }
 
   Future<List<Comic>> searchComic(String searchString) async {
+    if(searchString.length < 3) return [];
     return listComicFromFirebase
         .where(
           (comic) =>
