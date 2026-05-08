@@ -1,47 +1,21 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:comico/screen/chapter_screen.dart';
 import 'package:comico/screen/read_screen.dart';
 import 'package:comico/state/state_manager.dart';
+import 'package:comico/service/api_service.dart';
 
 import 'model/comic.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final FirebaseApp app = await Firebase.initializeApp(
-    name: 'ReadApp',
-    options: Platform.isMacOS || Platform.isIOS
-        ? FirebaseOptions(
-            appId: '1:904073159015:ios:db823ecf375628e3598fc2',
-            apiKey: 'AIzaSyB-t3hPoPG2SZ0TU8Yn310_Nw84AFugRtU',
-            projectId: 'reader-app-95191',
-            messagingSenderId: '904073159015',
-            databaseURL:
-                'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
-          )
-        : FirebaseOptions(
-            appId: '1:904073159015:android:42c4cab64559fde8598fc2',
-            apiKey: 'AIzaSyCB7wOkEUqY48T5W5yp2E9OtpNCRRBe-i0',
-            projectId: 'reader-app-95191',
-            messagingSenderId: '904073159015',
-            databaseURL:
-                'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
-          ),
-  );
-  runApp(ProviderScope(child: MyApp(app: app)));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.app});
-
-  final FirebaseApp app;
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,15 +29,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Comico Read', app: app),
+      home: const MyHomePage(title: 'Comico Read'),
     );
   }
 }
 
 class MyHomePage extends ConsumerStatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.app});
+  const MyHomePage({super.key, required this.title});
 
-  final FirebaseApp app;
   final String title;
 
   @override
@@ -71,9 +44,6 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  late DatabaseReference _bannerRef, _comicsRef;
-  List<Comic> listComicFromFirebase = [];
-
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -88,18 +58,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     _searchFocusNode.unfocus();
     _searchController.clear();
     ref.read(isSearch.notifier).state = false;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final FirebaseDatabase database = FirebaseDatabase.instanceFor(
-      app: widget.app,
-      databaseURL:
-          'https://reader-app-95191-default-rtdb.asia-southeast1.firebasedatabase.app/',
-    );
-    _bannerRef = database.ref().child('Banners');
-    _comicsRef = database.ref().child('Comic');
   }
 
   @override
@@ -140,7 +98,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[300],
-                          child: Column(
+                          child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
@@ -165,21 +123,21 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   Navigator.pushNamed(context, '/chapters');
                 },
                 suggestionsCallback: (searchString) async {
-                  return await searchComic(searchString);
+                  return await ApiService.searchComics(searchString);
                 },
               )
-            : Text(widget.title, style: TextStyle(color: Colors.white)),
+            : Text(widget.title, style: const TextStyle(color: Colors.white)),
         actions: [
           if (!searchEnable)
             IconButton(
               onPressed: () => ref.read(isSearch.notifier).state = true,
-              icon: Icon(Icons.search),
+              icon: const Icon(Icons.search),
               color: Colors.white,
             ),
         ],
       ),
       body: FutureBuilder<List<String>>(
-        future: getBanners(_bannerRef),
+        future: ApiService.getBanners(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Column(
@@ -192,7 +150,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     return Builder(
                       builder: (context) {
                         return Card(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 10,
                           ),
@@ -207,15 +165,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                 e,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-
                                 loadingBuilder:
                                     (context, child, loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        return child;
-                                      }
+                                      if (loadingProgress == null) return child;
                                       return Container(
                                         color: Colors.grey[300],
-                                        child: Center(
+                                        child: const Center(
                                           child: CircularProgressIndicator(),
                                         ),
                                       );
@@ -223,7 +178,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color: Colors.grey[300],
-                                    child: Column(
+                                    child: const Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
@@ -274,8 +229,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       flex: 4,
                       child: Container(
                         color: Colors.teal,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
                           child: Text(
                             'New Comics',
                             style: TextStyle(color: Colors.white),
@@ -287,8 +242,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       flex: 1,
                       child: Container(
                         color: Colors.black.withValues(alpha: 0.1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.new_releases_outlined,
                             color: Colors.teal,
@@ -301,20 +256,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 ),
 
                 // --- Comics Grid ---
-                FutureBuilder(
-                  future: getComics(_comicsRef),
+                FutureBuilder<List<Comic>>(
+                  future: ApiService.getComics(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return Center(child: Text('${snapshot.error}'));
                     } else if (snapshot.hasData) {
-                      List<Comic> comics = [];
-                      snapshot.data?.forEach((item) {
-                        var comic = Comic.fromJson(
-                          jsonDecode(jsonEncode(item)),
-                        );
-                        comics.add(comic);
-                      });
-                      listComicFromFirebase = comics;
+                      final comics = snapshot.data!;
                       return Expanded(
                         child: GridView.count(
                           crossAxisCount: 2,
@@ -340,12 +288,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                         fit: BoxFit.cover,
                                         loadingBuilder:
                                             (context, child, loadingProgress) {
-                                              if (loadingProgress == null) {
+                                              if (loadingProgress == null)
                                                 return child;
-                                              }
                                               return Container(
                                                 color: Colors.grey[200],
-                                                child: Center(
+                                                child: const Center(
                                                   child:
                                                       CircularProgressIndicator(),
                                                 ),
@@ -359,7 +306,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.broken_image,
                                                       color: Colors.grey,
                                                       size: 40,
@@ -373,7 +320,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                                         comic.name,
                                                         textAlign:
                                                             TextAlign.center,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                           color: Colors.grey,
                                                           fontSize: 12,
                                                         ),
@@ -401,7 +348,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                                 Expanded(
                                                   child: Text(
                                                     comic.name,
-                                                    style: TextStyle(
+                                                    style: const TextStyle(
                                                       color: Colors.white,
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -424,7 +371,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         ),
                       );
                     }
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   },
                 ),
               ],
@@ -432,41 +379,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('${snapshot.error}'));
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
-  }
-
-  Future<List<String>> getBanners(DatabaseReference bannerRef) async {
-    final event = await bannerRef.once();
-    final data = event.snapshot.value;
-    if (data == null) return [];
-    if (data is List) return data.map((e) => e.toString()).toList();
-    if (data is Map) return data.values.map((e) => e.toString()).toList();
-    return [];
-  }
-
-  Future<List<dynamic>> getComics(DatabaseReference comicsRef) async {
-    final event = await comicsRef.once();
-    final data = event.snapshot.value;
-    if (data == null) return [];
-    if (data is List) return data;
-    if (data is Map) return data.values.toList();
-    return [];
-  }
-
-  Future<List<Comic>> searchComic(String searchString) async {
-    if(searchString.length < 3) return [];
-    return listComicFromFirebase
-        .where(
-          (comic) =>
-              comic.name.toLowerCase().contains(searchString.toLowerCase()) ||
-              (comic.category.isNotEmpty &&
-                  comic.category.toLowerCase().contains(
-                    searchString.toLowerCase(),
-                  )),
-        )
-        .toList();
   }
 }

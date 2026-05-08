@@ -1,12 +1,14 @@
 import 'chapters.dart';
 
 class Comic {
+  int id;
   String category;
   String name;
   String image;
   List<Chapters> chapters;
 
   Comic({
+    this.id = 0,
     this.category = '',
     this.name = '',
     this.image = '',
@@ -14,21 +16,23 @@ class Comic {
   }) : chapters = chapters ?? [];
 
   Comic.fromJson(Map<String, dynamic> json)
-      : category = json['Category'] ?? '',
-        image = json['Image'] ?? '',
-        name = json['Name'] ?? '', 
-        chapters = json['Chapters'] != null
-            ? (json['Chapters'] as List)
+      : id = json['id'] ?? 0,
+        category = json['category'] ?? '',
+        image = json['image'] ?? '',
+        name = json['name'] ?? '',
+        chapters = json['chapters'] != null
+            ? (json['chapters'] as List)
                 .map((v) => Chapters.fromJson(v))
                 .toList()
             : [];
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {};
-    data['Category'] = category;
-    data['Chapters'] = chapters.map((v) => v.toJson()).toList();
-    data['Image'] = image;
-    data['Name'] = name;
-    return data;
+    return {
+      'id': id,
+      'category': category,
+      'chapters': chapters.map((v) => v.toJson()).toList(),
+      'image': image,
+      'name': name,
+    };
   }
 }
