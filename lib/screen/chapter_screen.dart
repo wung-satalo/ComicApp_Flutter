@@ -39,7 +39,7 @@ class ChapterScreen extends ConsumerWidget {
                     },
                     child: Column(
                       children: [
-                        ListTile(title: Text('${comic.chapters[index].name}')),
+                        ListTile(title: Text(comic.chapters[index].name)),
                         const Divider(thickness: 1),
                       ],
                     ),

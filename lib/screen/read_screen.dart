@@ -10,7 +10,7 @@ class ReadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final comic = ref.watch(comicSelected);
     final chapter = ref.watch(chapterSelected);
-    final links = chapter.links ?? [];
+    final links = chapter.links;
     final readingMode = ref.watch(readingModeProvider);
 
     return Scaffold(
